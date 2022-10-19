@@ -11,6 +11,9 @@
 		3CC024F229002C83007BE4C2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CC024F129002C83007BE4C2 /* ContentView.swift */; };
 		3CC024F429002C84007BE4C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CC024F329002C84007BE4C2 /* Assets.xcassets */; };
 		3CC024F829002C84007BE4C2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CC024F729002C84007BE4C2 /* Preview Assets.xcassets */; };
+		3CC0250029002CC3007BE4C2 /* CocoaMQTT in Frameworks */ = {isa = PBXBuildFile; productRef = 3CC024FF29002CC3007BE4C2 /* CocoaMQTT */; };
+		3CC0250229002CC3007BE4C2 /* CocoaMQTTWebSocket in Frameworks */ = {isa = PBXBuildFile; productRef = 3CC0250129002CC3007BE4C2 /* CocoaMQTTWebSocket */; };
+		3CC0250429002CD1007BE4C2 /* MqttPozzi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CC0250329002CD1007BE4C2 /* MqttPozzi.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +23,7 @@
 		3CC024F329002C84007BE4C2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3CC024F529002C84007BE4C2 /* MQTT.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MQTT.entitlements; sourceTree = "<group>"; };
 		3CC024F729002C84007BE4C2 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		3CC0250329002CD1007BE4C2 /* MqttPozzi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MqttPozzi.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -27,6 +31,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3CC0250229002CC3007BE4C2 /* CocoaMQTTWebSocket in Frameworks */,
+				3CC0250029002CC3007BE4C2 /* CocoaMQTT in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -36,6 +42,7 @@
 		3CC024E329002C83007BE4C2 = {
 			isa = PBXGroup;
 			children = (
+				3CC0250329002CD1007BE4C2 /* MqttPozzi.swift */,
 				3CC024EE29002C83007BE4C2 /* MQTT */,
 				3CC024ED29002C83007BE4C2 /* Products */,
 			);
@@ -85,6 +92,10 @@
 			dependencies = (
 			);
 			name = MQTT;
+			packageProductDependencies = (
+				3CC024FF29002CC3007BE4C2 /* CocoaMQTT */,
+				3CC0250129002CC3007BE4C2 /* CocoaMQTTWebSocket */,
+			);
 			productName = MQTT;
 			productReference = 3CC024EC29002C83007BE4C2 /* MQTT.app */;
 			productType = "com.apple.product-type.application";
@@ -113,6 +124,9 @@
 				Base,
 			);
 			mainGroup = 3CC024E329002C83007BE4C2;
+			packageReferences = (
+				3CC024FE29002CC3007BE4C2 /* XCRemoteSwiftPackageReference "CocoaMQTT" */,
+			);
 			productRefGroup = 3CC024ED29002C83007BE4C2 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -141,6 +155,7 @@
 			files = (
 				3CC024F229002C83007BE4C2 /* ContentView.swift in Sources */,
 				3CC024F029002C83007BE4C2 /* MQTTApp.swift in Sources */,
+				3CC0250429002CD1007BE4C2 /* MqttPozzi.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -354,6 +369,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3CC024FE29002CC3007BE4C2 /* XCRemoteSwiftPackageReference "CocoaMQTT" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/emqx/CocoaMQTT/";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3CC024FF29002CC3007BE4C2 /* CocoaMQTT */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3CC024FE29002CC3007BE4C2 /* XCRemoteSwiftPackageReference "CocoaMQTT" */;
+			productName = CocoaMQTT;
+		};
+		3CC0250129002CC3007BE4C2 /* CocoaMQTTWebSocket */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3CC024FE29002CC3007BE4C2 /* XCRemoteSwiftPackageReference "CocoaMQTT" */;
+			productName = CocoaMQTTWebSocket;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3CC024E429002C83007BE4C2 /* Project object */;
 }
