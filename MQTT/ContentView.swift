@@ -9,16 +9,33 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @StateObject var viewModel = MqttPozzi()
+    @StateObject var service = OpccollectorService()
+    @StateObject var mqttPozzi = MqttPozzi()
+    
     
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("\(viewModel.value ?? 0)")
-            Text("\(viewModel.timeStamp ?? Date())")
-
+        NavigationStack{
+            List{
+                ForEach(service.pozzi, id:\.name) { pozzo in
+                    NavigationLink {
+                        TagView(pozzo: [pozzo]).environmentObject(mqttPozzi)
+                    } label: {
+                        /*@START_MENU_TOKEN@*/Text(pozzo.name)/*@END_MENU_TOKEN@*/
+                    }
+                    
+                    
+                }
+            }
+            
+        }
+        .onAppear(){
+            Task {
+                try? await service.getTags()
+                
+                
+                
+            }
+            
         }
         .padding()
     }

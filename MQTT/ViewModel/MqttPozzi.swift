@@ -20,15 +20,35 @@ protocol MqttPozziParser {
 
 class MqttPozzi: ObservableObject {
     
-    @Published var tagId: Int?
-    @Published var timeStamp: Date?
-    @Published var register: String?
-    @Published var quality: Int?
-    @Published var value: Double?
+    @Published var mqttTag: [MqttTag] = []
+    @Published var isConnected: Bool = false
     
     var mqtt: CocoaMQTT?
     
+    private var pozzi: [Pozzo] = []
+    
     init(){
+        
+    }
+    
+    private func unsubscribe(){
+        for tag in self.mqttTag{
+            if tag.isSubscripted {
+               
+                        mqtt?.unsubscribe(tag.mqttKey)
+                        print("Unsubscribed \(tag.mqttKey)")
+                    
+                    
+                }
+            
+            mqttTag.removeAll()
+        }
+    }
+    
+    func subscribe(pozzi: [Pozzo]){
+        self.unsubscribe()
+        self.pozzi = pozzi
+        
         let clientID = "CocoaMQTT-Pozzi" + String(ProcessInfo().processIdentifier)
         let websocket = CocoaMQTTWebSocket(uri: "/mqtt")
         mqtt = CocoaMQTT(clientID: clientID, host: "10.142.69.113", port: 1884, socket: websocket)
@@ -38,11 +58,20 @@ class MqttPozzi: ObservableObject {
             mqtt.willMessage = CocoaMQTTMessage(topic: "/will", string: "dieout")
             mqtt.keepAlive = 60
             mqtt.delegate = self
-            mqtt.logLevel = .off
+            mqtt.logLevel = .info
+            mqtt.autoReconnect = true
             mqtt.connect()
+            for pozzo in pozzi{
+                for tag in pozzo.tags{
+                    mqttTag.append(MqttTag(pump: pozzo, tag: tag))
+                    
+                }
+            }
         }
         
     }
+  
+  
 }
 
 extension MqttPozzi: MqttPozziParser {
@@ -58,12 +87,19 @@ extension MqttPozzi: MqttPozziParser {
         guard values.count == 5 else {
             return
         }
-        self.tagId = Int(values[0])
-        self.register = values[1]
-        self.value = Double(values[2])
+        let tagId = Int(values[0])
+        let register = values[1]
+        let value = Double(values[2])
         let seconds =  Double(values[3])!
-        self.timeStamp = Date.init(timeIntervalSince1970: seconds - 120*60)
-        self.quality = Int(values[4])
+        let timeStamp = Date.init(timeIntervalSince1970: seconds - 120*60)
+        let quality = Int(values[4])
+        let tag = mqttTag.filter({ $0.tagId == tagId }).first
+        if let tag = tag {
+            if  let quality = quality, let value = value, let tagId = tagId {
+                tag.update(timeStamp: timeStamp, register: register, quality: quality, value: value, tagId: tagId)
+                self.objectWillChange.send()
+            }
+        }
         
     }
     
@@ -93,8 +129,18 @@ extension MqttPozzi: CocoaMQTTDelegate {
         TRACE("ack: \(ack)")
 
         if ack == .accept {
-            mqtt.subscribe("/Pozzo BV1/Dati/ITBV1FI1", qos: CocoaMQTTQoS.qos1)
             
+            for pozzo in pozzi{
+                for tag in pozzo.tags{
+                    let path = "/Pozzo \(pozzo.name)/Dati/\(tag.name)"
+                    print("Sottoscrivo \(path)")
+                    
+                    mqtt.subscribe(path, qos: CocoaMQTTQoS.qos2)
+                       
+                   
+                }
+            }
+           
         }
     }
 
@@ -114,12 +160,30 @@ extension MqttPozzi: CocoaMQTTDelegate {
         TRACE("message: , id: \(id)")
 
         let name = NSNotification.Name(rawValue: "MQTTMessageNotification" )
-        self.parse(payload: message.string ?? "")
+        
+        DispatchQueue.main.async {
+            self.parse(payload: message.string ?? "")
+        }
+        
+        
+        
         NotificationCenter.default.post(name: name, object: self, userInfo: ["message": message.string!, "topic": message.topic, "id": id])
     }
 
     func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopics success: NSDictionary, failed: [String]) {
         TRACE("subscribed: \(success), failed: \(failed)")
+        guard success.count > 0 else {
+            return
+        }
+        let key = success.allKeys[0] as? String
+        if let key = key {
+            let tag = self.mqttTag.filter({$0.mqttKey == key }).first
+            if let tag = tag {
+                tag.isSubscripted = true
+            }
+        }
+        
+        
     }
 
     func mqtt(_ mqtt: CocoaMQTT, didUnsubscribeTopics topics: [String]) {
